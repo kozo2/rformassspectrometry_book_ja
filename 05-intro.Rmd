@@ -1,88 +1,60 @@
 # Introduction {#sec-msintro}
 
 
-## How does mass spectrometry work?
+## 質量分析法はどのように機能するのか？
 
-Mass spectrometry (MS) is a technology that *separates* charged
-molecules (ions) based on their mass to charge ratio (M/Z). It is
-often coupled to chromatography (liquid LC, but can also be gas-based
-GC). The time an analyte takes to elute from the chromatography
-column is the *retention time*.
-
+質量分析法（MS）は、荷電分子（イオン）を質量対電荷比（M/Z）に基づいて*分離*する技術です。
+通常はクロマトグラフィー（液体クロマトグラフィー：LC、または気体クロマトグラフィー：GC）と組み合わせて使用されます。
+分析対象物質がクロマトグラフィーのカラムから溶出するのにかかる時間を*保持時間*（リテンションタイム）と呼びます。
 
 ```{r, results='markup', fig.cap="A chromatogram, illustrating the total amount of analytes over the retention time.", echo=FALSE, purl=FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics("./img/chromatogram.png")
 ```
 
-An mass spectrometer is composed of three components:
+質量分析計は以下の3つの構成要素から成り立っています：
 
-1. The *source*, that ionises the molecules: examples are Matrix-assisted
-   laser desorption/ionisation (MALDI) or electrospray ionisation.
-   (ESI)
-2. The *analyser*, that separates the ions: Time of flight (TOF) or Orbitrap.
-3. The *detector* that quantifies the ions.
+1. *イオン化源*：分子をイオン化する装置で、例としてマトリックス支援レーザー脱離イオン化（MALDI）やエレクトロスプレーイオン化（ESI）などがあります。
+2. *分析器*：イオンを分離する装置で、例として飛行時間型（TOF）やOrbitrapがあります。
+3. *検出器*：イオンを定量化する装置です。
 
-When using mass spectrometry for proteomics, the proteins are first
-digested with a protease such as trypsin. In mass shotgun proteomics,
-the analytes assayed in the mass spectrometer are peptides.
+プロテオミクスのために質量分析を使用する場合、タンパク質は最初にトリプシンなどのプロテアーゼによって消化されます。
+ショットガンプロテオミクスにおいて、質量分析計で測定される分析対象はペプチドです。
 
-Often, ions are subjected to more than a single MS round. After a
-first round of separation, the peaks in the spectra, called MS1
-spectra, represent peptides. At this stage, the only information we
-possess about these peptides are their retention time and their
-mass-to-charge (we can also infer their charge by inspecting their
-isotopic envelope, i.e the peaks of the individual isotopes, see
-below), which is not enough to infer their identify (i.e. their
-sequence).
+多くの場合、イオンは1回以上のMS測定を受けます。
+最初の分離段階では、スペクトル中のピーク（MS1スペクトルと呼ばれる）はペプチドを表します。
+この段階で得られる情報は、ペプチドの保持時間と質量対電荷比（M/Z）のみです（同位体分布、つまり個々の同位体のピークを見ることで電荷状態も推定可能ですが、詳細は後述）。
+しかし、これだけではペプチドの同定（すなわち配列の推定）には不十分です。
 
-In MSMS (or MS2), the settings of the mass spectrometer are set
-automatically to select a certain number of MS1 peaks (for example
-20)^[Here, we will focus on data dependent acquisition (DDA), where
-MS1 peaks are selected. In data independent acquisition (DIA), all peaks
-in the MS1 spectrum are fragmented.]. Once a narrow M/Z range has been
-selected (corresponding to one high-intensity peak, a peptide, and
-some background noise), it is fragmented (using for example
-collision-induced dissociation (CID), higher energy collisional
-dissociation (HCD) or electron-transfer dissociation (ETD)). The
-fragment ions are then themselves separated in the analyser to produce
-a MS2 spectrum. The unique fragment ion pattern can then be used to
-infer the peptide sequence using de novo sequencing (when the spectrum
-is of high enough quality) or using a search engine such as, for
-example Mascot, MSGF+, ..., that will match the observed, experimental
-spectrum to theoretical spectra (see details below).
-
+MSMS（またはMS2）では、質量分析計の設定が自動的に行われ、MS1スペクトルのピークのうち一定数（例えば20個）が選択されます。^\[ここではMS1ピークが選択されるデータ依存型取得（DDA）に焦点を当てます。データ非依存型取得（DIA）では、MS1スペクトル中のすべてのピークが断片化されます。] 
+一定の狭いM/Z範囲（高強度なピーク＝ペプチド、加えて背景ノイズを含む）を選択し、その範囲内のイオンを断片化します（例：衝突誘起解離（CID）、高エネルギー衝突解離（HCD）、電子移動解離（ETD）など）。
+その後、断片化されたイオンが分析器で再度分離され、MS2スペクトルが生成されます。
+このユニークな断片イオンパターンを用いて、ペプチドの配列を推定します。
+スペクトルの品質が十分に高い場合には**デノボ配列決定**が可能ですし、そうでない場合はMascotやMSGF+などの**サーチエンジン**を用いて、実験スペクトルと理論スペクトルを比較・照合することで同定が行われます（詳細は後述）。
 
 ```{r, results='markup', fig.cap="Schematics of a mass spectrometer and two rounds of MS.", echo=FALSE, purl=FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics("./img/SchematicMS2.png")
 ```
 
 
-The animation below show how 25 ions different ions (i.e. having
-different M/Z values) are separated throughout the MS analysis and are
-eventually detected (i.e. quantified). The final frame shows the
-hypothetical spectrum.
+以下のアニメーションは、25種類の異なるイオン（すなわち、異なるM/Z値を持つイオン）がMS解析の過程でどのように分離され、最終的に検出（すなわち定量）されるかを示しています。
+最後のフレームは仮想的なスペクトルを示しています。
 
 
 ```{r, results='markup', fig.cap="Separation and detection of ions in a mass spectrometer.", echo=FALSE, purl=FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics("./img/mstut.gif")
 ```
 
-The figures below illustrate the two rounds of MS. The spectrum on the
-left is an MS1 spectrum acquired after 21 minutes and 3 seconds of
-elution. 10 peaks, highlited by dotted vertical lines, were selected
-for MS2 analysis. The peak at M/Z 460.79 (488.8) is highlighted by a
-red (orange) vertical line on the MS1 spectrum and the fragment
-spectra are shown on the MS2 spectrum on the top (bottom) right
-figure.
+下の図は、2段階のMS（質量分析）を示しています。
+左側のスペクトルは、溶出開始から21分3秒後に取得されたMS1スペクトルです。
+点線の縦線で示された10個のピークがMS2解析のために選択されました。
+MS1スペクトル上では、M/Z 460.79（488.8）のピークが赤（オレンジ）の縦線で強調表示されており、そのフラグメントスペクトルが右上（右下）のMS2スペクトルとして示されています。
 
 ```{r, results='markup', fig.cap="Parent ions in the MS1 spectrum (left) and two sected fragment ions MS2 spectra (right)", echo=FALSE, purl=FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics("./img/MS1-MS2-spectra.png")
 ```
 
-The figures below represent the 3 dimensions of MS data: a set of
-spectra (M/Z and intensity) of retention time, as well as the
-interleaved nature of MS1 and MS2 (and there could be more levels)
-data.
+以下の図は、MSデータの3つの次元を表しています。
+すなわち、保持時間ごとのスペクトル（M/Zおよび強度）の集合、そしてMS1とMS2（さらに多くのレベルが存在する可能性もあります）のデータが交互に記録される性質です。
 
 ```{r, results='markup', fig.cap="MS1 spectra over retention time.", echo=FALSE, purl=FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics("./img/F02-3D-MS1-scans-400-1200-lattice.png")
